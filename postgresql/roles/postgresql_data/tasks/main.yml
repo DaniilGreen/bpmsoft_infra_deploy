@@ -1,0 +1,89 @@
+---
+# PostgreSQL Data Setup
+# Combined role for restore and scripts
+
+- name: Check if backup file exists
+  stat:
+    path: "backups/{{ bpmsoft_backup_version }}/{{ bpmsoft_backup_file }}"
+  register: backup_file_check
+  delegate_to: localhost
+  become: no
+
+- name: Fail if backup file not found
+  fail:
+    msg: "Backup file backups/{{ bpmsoft_backup_version }}/{{ bpmsoft_backup_file }} not found!"
+  when: not backup_file_check.stat.exists
+
+# Директория для бэкапов больше не нужна - восстанавливаем из домашней папки
+
+- name: Check if backup file already exists on server
+  stat:
+    path: "~/{{ bpmsoft_backup_file }}"
+  register: backup_file_on_server
+  become: no
+
+- name: Copy backup file to server using scp with progress
+  command: >
+    scp -o StrictHostKeyChecking=no 
+    "backups/{{ bpmsoft_backup_version }}/{{ bpmsoft_backup_file }}" 
+    "{{ ansible_user }}@{{ ansible_host }}:~/{{ bpmsoft_backup_file }}"
+  delegate_to: localhost
+  become: no
+  register: scp_result
+  when: not backup_file_on_server.stat.exists
+
+- name: Check if backup file exists (either copied or already present)
+  stat:
+    path: "~/{{ bpmsoft_backup_file }}"
+  register: backup_file_final_check
+  become: no
+
+- name: Fail if backup file does not exist
+  fail:
+    msg: "Backup file ~/{{ bpmsoft_backup_file }} not found!"
+  when: not backup_file_final_check.stat.exists
+
+# Копируем файл в /tmp с правами для postgres
+- name: Copy backup file to /tmp for postgres user
+  copy:
+    src: "{{ backup_source_dir | default(ansible_env.HOME) }}/{{ bpmsoft_backup_file }}"
+    dest: "/tmp/{{ bpmsoft_backup_file }}"
+    owner: postgres
+    group: postgres
+    mode: '0644'
+    remote_src: yes
+  become: yes
+
+- name: Drop existing database if exists
+  command: >
+    sudo -u postgres psql -c "DROP DATABASE IF EXISTS {{ bpmsoft_db_name }};"
+  become: yes
+  ignore_errors: yes
+
+- name: Create empty database for restore
+  command: >
+    sudo -u postgres psql -c "CREATE DATABASE {{ bpmsoft_db_name }} WITH OWNER {{ bpmsoft_db_owner }} ENCODING 'UTF8' LC_COLLATE 'en_US.UTF-8' LC_CTYPE 'en_US.UTF-8' TEMPLATE template0;"
+  become: yes
+
+- name: Restore database from backup
+  shell: >
+    sudo -u postgres env PGPASSWORD='{{ bpmsoft_db_password }}' pg_restore 
+    --host localhost 
+    --port 5432
+    --username {{ bpmsoft_db_owner }}
+    --dbname {{ bpmsoft_db_name }}
+    --no-owner 
+    --no-privileges 
+    --verbose
+    /tmp/{{ bpmsoft_backup_file }}
+  become: yes
+  register: restore_result
+  failed_when: restore_result.rc != 0 and "already exists" not in restore_result.stderr
+  async: 3600
+  poll: 10
+
+- name: Clean up backup file
+  file:
+    path: "/tmp/{{ bpmsoft_backup_file }}"
+    state: absent
+  when: cleanup_backup_file | default(true)

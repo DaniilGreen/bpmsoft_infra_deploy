@@ -1,0 +1,28 @@
+---
+- name: Setup SSH key for all servers
+  hosts: all
+  become: yes
+  gather_facts: yes
+  
+  vars:
+    ssh_public_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  
+  tasks:
+    - name: Add SSH public key to authorized_keys
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ ssh_public_key }}"
+        state: present
+        comment: "Ansible deployment key"
+    
+    - name: Configure sudo without password for deployment user
+      lineinfile:
+        path: /etc/sudoers.d/ansible-deployment
+        line: "{{ ansible_user }} ALL=(ALL) NOPASSWD:ALL"
+        create: yes
+        validate: 'visudo -cf %s'
+        mode: '0440'
+    
+    - name: Display success message
+      debug:
+        msg: "SSH key and sudo configured for {{ ansible_user }}@{{ inventory_hostname }}"

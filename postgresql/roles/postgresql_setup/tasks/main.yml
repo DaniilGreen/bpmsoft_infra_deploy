@@ -1,0 +1,15 @@
+---
+# PostgreSQL Users and Database Setup
+# Simplified: only one user bpmuser as superuser and owner
+
+- name: Create BPMSoft user (superuser and owner)
+  command: >
+    sudo -u postgres psql -c "CREATE USER {{ bpmsoft_db_owner }} WITH SUPERUSER LOGIN CREATEDB CREATEROLE PASSWORD '{{ bpmsoft_db_password }}';"
+  become: yes
+  ignore_errors: yes
+
+- name: Create BPMSoft database
+  command: >
+    sudo -u postgres psql -c "CREATE DATABASE {{ bpmsoft_db_name }} WITH OWNER {{ bpmsoft_db_owner }} ENCODING 'UTF8' LC_COLLATE 'en_US.UTF-8' LC_CTYPE 'en_US.UTF-8' TEMPLATE template0;"
+  become: yes
+  ignore_errors: yes

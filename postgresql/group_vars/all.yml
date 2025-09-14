@@ -1,0 +1,28 @@
+---
+# PostgreSQL Configuration (only from BPMSoft manual)
+postgresql_version: "16"
+postgresql_listen_addresses: "*"
+
+# Environment configuration
+environment: "{{ env | default('dev') }}"
+bpmsoft_db_name_prefix: "bpmsoft"
+bpmsoft_db_name: "{{ bpmsoft_db_name_prefix }}_{{ env | default('dev') }}"
+
+# Backup configuration
+bpmsoft_backup_version: "{{ backup_version | default('v1.8.0') }}"
+bpmsoft_backup_file: "bpmsoft.backup"
+postgresql_backup_dir: "/tmp/postgresql_backups"
+cleanup_backup_file: true
+
+# BPMSoft specific configuration
+bpmsoft_db_owner: "bpmuser"
+bpmsoft_db_password: "t3vlkNGIl15SgK9pyCOSZ8cs"
+
+# Security settings
+postgresql_hba_entries:
+  - { type: "local", database: "all", user: "postgres", method: "peer" }
+  - { type: "local", database: "all", user: "all", method: "peer" }
+  - { type: "host", database: "all", user: "all", address: "127.0.0.1/32", method: "md5" }
+  - { type: "host", database: "all", user: "all", address: "::1/128", method: "md5" }
+  - { type: "host", database: "all", user: "all", address: "0.0.0.0/0", method: "md5" }
+

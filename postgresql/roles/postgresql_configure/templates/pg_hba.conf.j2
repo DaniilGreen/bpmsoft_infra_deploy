@@ -1,0 +1,18 @@
+# PostgreSQL Client Authentication Configuration File
+# ===================================================
+#
+# Refer to the "Client Authentication" section in the PostgreSQL
+# documentation for a complete description of this file.
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+# "local" is for Unix domain socket connections only
+{% for entry in postgresql_hba_entries %}
+{{ entry.type }} {{ entry.database | default('all') }} {{ entry.user | default('all') }}{% if entry.address is defined %} {{ entry.address }}{% endif %} {{ entry.method }}
+{% endfor %}
+
+# Allow replication connections from localhost, by a user with the
+# replication privilege.
+#local   replication     postgres                                peer
+#host    replication     postgres        127.0.0.1/32            scram-sha-256
+#host    replication     postgres        ::1/128                 scram-sha-256

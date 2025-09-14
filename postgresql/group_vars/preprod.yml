@@ -1,0 +1,4 @@
+---
+# Pre-production environment
+environment: "preprod"
+bpmsoft_db_name: "bpmsoft_preprod"

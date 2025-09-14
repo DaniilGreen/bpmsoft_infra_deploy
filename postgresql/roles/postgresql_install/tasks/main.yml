@@ -1,0 +1,66 @@
+---
+# Debian/Ubuntu installation
+- name: Add PostgreSQL official repository key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Add PostgreSQL repository
+  apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+    state: present
+    filename: postgresql
+  when: ansible_os_family == "Debian"
+
+- name: Update package cache (Debian)
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Install PostgreSQL server and client (Debian)
+  package:
+    name:
+      - postgresql-{{ postgresql_version }}
+      - postgresql-client-{{ postgresql_version }}
+      - postgresql-contrib-{{ postgresql_version }}
+      - postgresql-common
+      - python3-psycopg2
+    state: present
+  when: ansible_os_family == "Debian"
+
+# RHEL/CentOS/RED OS installation
+- name: Install PostgreSQL repository (RHEL)
+  yum_repository:
+    name: postgresql{{ postgresql_version }}
+    description: PostgreSQL {{ postgresql_version }} repository
+    baseurl: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-$releasever-$basearch"
+    gpgcheck: yes
+    gpgkey: "https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG"
+    enabled: yes
+  when: ansible_os_family in ["RedHat", "RED"]
+
+- name: Install PostgreSQL server and client (RHEL)
+  package:
+    name:
+      - postgresql{{ postgresql_version }}-server
+      - postgresql{{ postgresql_version }}
+      - postgresql{{ postgresql_version }}-contrib
+      - python3-psycopg2
+    state: present
+  when: ansible_os_family in ["RedHat", "RED"]
+
+- name: Initialize PostgreSQL database (RHEL)
+  command: /usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb
+  when: ansible_os_family in ["RedHat", "RED"]
+  ignore_errors: yes
+
+- name: Start and enable PostgreSQL service
+  systemd:
+    name: "{{ postgresql_service_name }}"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+

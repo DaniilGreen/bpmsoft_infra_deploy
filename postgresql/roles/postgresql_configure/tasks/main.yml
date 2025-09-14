@@ -1,0 +1,40 @@
+---
+- name: Create PostgreSQL configuration backup
+  copy:
+    src: "{{ postgresql_config_dir }}/postgresql.conf"
+    dest: "{{ postgresql_config_dir }}/postgresql.conf.backup.{{ ansible_date_time.epoch }}"
+    remote_src: yes
+  ignore_errors: yes
+
+- name: Configure PostgreSQL settings
+  lineinfile:
+    path: "{{ postgresql_config_dir }}/postgresql.conf"
+    regexp: "^{{ item.key }}\\s*="
+    line: "{{ item.key }} = {{ item.value }}"
+    backup: yes
+  loop:
+    - { key: "listen_addresses", value: "'{{ postgresql_listen_addresses }}'" }
+
+
+- name: Configure pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: "{{ postgresql_config_dir }}/pg_hba.conf"
+    owner: postgres
+    group: postgres
+    mode: '0640'
+    backup: yes
+
+- name: Restart PostgreSQL service
+  systemd:
+    name: "{{ postgresql_service_name }}"
+    state: restarted
+    daemon_reload: yes
+
+- name: Wait for PostgreSQL to restart
+  wait_for:
+    port: "5432"
+    host: "{{ ansible_default_ipv4.address }}"
+    delay: 5
+    timeout: 60
+

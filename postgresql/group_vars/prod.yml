@@ -1,0 +1,4 @@
+---
+# Production environment
+environment: "prod"
+bpmsoft_db_name: "bpmsoft_prod"
