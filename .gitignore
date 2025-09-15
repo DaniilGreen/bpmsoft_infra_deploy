@@ -1,0 +1,92 @@
+# Backup files and databases
+*.backup
+*.sql
+*.dump
+*.gz
+*.bz2
+*.zip
+*.tar
+
+# Backup directories
+backups/
+**/backups/
+
+# Log files
+*.log
+logs/
+**/logs/
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+**/tmp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ansible
+*.retry
+.ansible/
+ansible.cfg
+
+# SSH keys (except public keys)
+id_rsa
+id_ed25519
+*.pem
+*.key
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Large files (>50MB)
+*.iso
+*.dmg
+*.pkg
+*.deb
+*.rpm
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Archive files
+*.7z
+*.rar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
