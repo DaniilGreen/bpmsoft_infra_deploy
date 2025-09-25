@@ -1,0 +1,42 @@
+---
+- name: Create Redis configuration backup
+  copy:
+    src: "{{ redis_config_file }}"
+    dest: "{{ redis_config_file }}.backup.{{ ansible_date_time.epoch }}"
+    remote_src: yes
+  ignore_errors: yes
+
+# Configure Redis settings according to BPMSoft manual
+- name: Set supervised to systemd
+  lineinfile:
+    path: "{{ redis_config_file }}"
+    regexp: "^supervised no"
+    line: "supervised systemd"
+    backup: yes
+
+- name: Comment out bind 127.0.0.1
+  lineinfile:
+    path: "{{ redis_config_file }}"
+    regexp: "^bind 127\\.0\\.0\\.1"
+    line: "#bind 127.0.0.1"
+    backup: yes
+
+- name: Set protected-mode to no
+  lineinfile:
+    path: "{{ redis_config_file }}"
+    regexp: "^protected-mode yes"
+    line: "protected-mode no"
+    backup: yes
+
+- name: Restart Redis service
+  systemd:
+    name: "{{ redis_service_name }}"
+    state: restarted
+    daemon_reload: yes
+
+- name: Wait for Redis to restart
+  wait_for:
+    port: 6379
+    host: "{{ ansible_default_ipv4.address }}"
+    delay: 5
+    timeout: 30

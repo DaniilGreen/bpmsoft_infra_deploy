@@ -1,0 +1,10 @@
+---
+# Redis Configuration (only from BPMSoft manual)
+redis_version: "latest"
+
+# Redis paths (will be set dynamically based on OS)
+redis_config_dir: "{{ '/etc/redis' if ansible_os_family == 'Debian' else '/etc' }}"
+redis_config_file: "{{ redis_config_dir }}/redis.conf"
+
+# Redis service names (will be set dynamically based on OS)
+redis_service_name: "{{ 'redis-server' if ansible_os_family == 'Debian' else 'redis' }}"

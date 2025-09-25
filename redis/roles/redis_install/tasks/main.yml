@@ -1,0 +1,45 @@
+---
+# Debian/Ubuntu installation
+- name: Update package cache (Debian)
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Install Redis server (Debian)
+  package:
+    name: redis-server
+    state: present
+  when: ansible_os_family == "Debian"
+
+# RHEL/CentOS/RED OS installation
+- name: Update package cache (RHEL)
+  yum:
+    update_cache: yes
+  when: ansible_os_family in ["RedHat", "RED"]
+
+- name: Install Redis server (RHEL)
+  package:
+    name: redis
+    state: present
+  when: ansible_os_family in ["RedHat", "RED"]
+
+# ALT Linux installation
+- name: Update package cache (ALT Linux)
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_distribution == "ALT"
+
+- name: Install Redis server (ALT Linux)
+  package:
+    name: redis
+    state: present
+  when: ansible_distribution == "ALT"
+
+- name: Start and enable Redis service
+  systemd:
+    name: "{{ redis_service_name }}"
+    state: started
+    enabled: yes
+    daemon_reload: yes

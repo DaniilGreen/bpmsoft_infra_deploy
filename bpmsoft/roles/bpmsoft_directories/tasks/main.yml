@@ -1,0 +1,17 @@
+---
+# Create BPMSoft base directory and set permissions
+
+- name: Create BPMSoft base directory
+  file:
+    path: "{{ bpmsoft_home_dir }}"
+    state: directory
+    owner: "{{ bpmsoft_user }}"
+    group: "{{ bpmsoft_user }}"
+    mode: '0755'
+
+- name: Set ownership recursively on /data directory
+  file:
+    path: "/data"
+    owner: "{{ bpmsoft_user }}"
+    group: "{{ bpmsoft_user }}"
+    recurse: yes

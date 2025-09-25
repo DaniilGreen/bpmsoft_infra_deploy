@@ -1,0 +1,29 @@
+---
+# Create dotnetuser if it doesn't exist
+
+- name: Check if dotnetuser exists
+  user:
+    name: "{{ bpmsoft_user }}"
+  register: user_check
+  failed_when: false
+
+- name: Create dotnetuser if it doesn't exist
+  user:
+    name: "{{ bpmsoft_user }}"
+    system: yes
+    shell: /bin/bash
+    home: "{{ bpmsoft_home_dir }}"
+    create_home: yes
+    password: "{{ 'dotnetuser' | password_hash('sha512') }}"
+    state: present
+  when: user_check.failed
+
+- name: Add dotnetuser to required groups
+  user:
+    name: "{{ bpmsoft_user }}"
+    groups: "{{ item }}"
+    append: yes
+  loop:
+    - "{{ bpmsoft_user }}"
+    - "systemd-journal"
+  when: user_check.failed

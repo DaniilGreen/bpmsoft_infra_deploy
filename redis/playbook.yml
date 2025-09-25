@@ -1,0 +1,37 @@
+---
+- name: Deploy Redis for BPMSoft
+  hosts: redis_servers
+  become: yes
+  gather_facts: yes
+  
+  # Automatically switch to SSH key if available
+  vars:
+    ansible_ssh_private_key_file: "{{ ssh_private_key | default('~/.ssh/id_rsa') }}"
+    
+  pre_tasks:
+    - name: Set Redis paths based on OS
+      set_fact:
+        redis_config_dir: "{{ '/etc/redis' if ansible_os_family == 'Debian' else '/etc' }}"
+        redis_config_file: "/etc/redis/redis.conf"
+        redis_service_name: "{{ 'redis-server' if ansible_os_family == 'Debian' else 'redis' }}"
+
+  roles:
+    - role: redis_install
+      tags: [install, redis]
+    
+    - role: redis_configure
+      tags: [configure, redis]
+
+  post_tasks:
+    - name: Verify Redis is running
+      systemd:
+        name: "{{ redis_service_name }}"
+        state: started
+        enabled: yes
+        
+    - name: Wait for Redis to start
+      wait_for:
+        port: 6379
+        host: "{{ ansible_default_ipv4.address }}"
+        delay: 5
+        timeout: 30

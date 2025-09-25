@@ -1,0 +1,14 @@
+[Unit]
+Description={{ bpmsoft_systemd_config.description }}
+
+[Service]
+Environment="COMPlus_ThreadPool_ForceMinWorkerThreads=100"
+ExecStart={{ bpmsoft_systemd_config.exec_start }}
+WorkingDirectory={{ bpmsoft_systemd_config.working_directory }}
+User={{ bpmsoft_systemd_config.user }}
+Group={{ bpmsoft_systemd_config.group }}
+Restart={{ bpmsoft_systemd_config.restart }}
+SyslogIdentifier={{ bpmsoft_systemd_config.syslog_identifier }}
+
+[Install]
+WantedBy=multi-user.target

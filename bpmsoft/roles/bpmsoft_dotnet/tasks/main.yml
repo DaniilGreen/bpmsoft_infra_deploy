@@ -1,0 +1,71 @@
+---
+# Install .NET 8.0 SDK and dependencies
+
+# Debian/Ubuntu/Astra Linux installation
+- name: Update package cache (Debian)
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Install apt-transport-https and curl (Debian)
+  apt:
+    name:
+      - apt-transport-https
+      - curl
+      - nano
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Download Microsoft repository key (Debian)
+  get_url:
+    url: "https://packages.microsoft.com/config/{{ ansible_distribution | lower }}/{{ ansible_distribution_version }}/packages-microsoft-prod.deb"
+    dest: "/tmp/packages-microsoft-prod.deb"
+    mode: '0644'
+  when: ansible_os_family == "Debian"
+  ignore_errors: yes
+
+- name: Install Microsoft repository (Debian)
+  apt:
+    deb: "/tmp/packages-microsoft-prod.deb"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Update package cache after adding Microsoft repo (Debian)
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Install .NET SDK and runtime (Debian)
+  apt:
+    name:
+      - dotnet-sdk-8.0
+      - dotnet-runtime-8.0
+      - libgdiplus
+      - libc6-dev
+      - unzip
+      - gss-ntlmssp
+    state: present
+  when: ansible_os_family == "Debian"
+
+# RHEL/RedOS installation
+- name: Install .NET SDK and runtime (RHEL)
+  yum:
+    name:
+      - dotnet-sdk-8.0
+      - dotnet-runtime-8.0
+      - libgdiplus
+      - unzip
+      - gssntlmssp
+    state: present
+  when: ansible_os_family in ["RedHat", "RED"]
+
+- name: Verify .NET installation
+  command: dotnet --list-sdks
+  register: dotnet_sdks
+  changed_when: false
+
+- name: Display .NET SDKs
+  debug:
+    msg: "Installed .NET SDKs: {{ dotnet_sdks.stdout_lines }}"

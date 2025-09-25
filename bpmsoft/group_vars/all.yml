@@ -1,0 +1,27 @@
+---
+# BPMSoft Configuration
+bpmsoft_user: "dotnetuser"
+bpmsoft_home_dir: "/data/bpmsoft"
+bpmsoft_service_name: "dotnet-bpmsoft"
+
+# .NET Configuration
+dotnet_version: "8.0"
+dotnet_sdk_version: "8.0.400"
+
+# Dependencies
+bpmsoft_dependencies:
+  - libgdiplus
+  - unzip
+  - nano
+  - curl
+  - gss-ntlmssp
+
+# SystemD service configuration
+bpmsoft_systemd_config:
+  description: "DotNet BPMSoft Service"
+  exec_start: "/usr/bin/dotnet BPMSoft.WebHost.dll"
+  working_directory: "{{ bpmsoft_home_dir }}"
+  user: "{{ bpmsoft_user }}"
+  group: "{{ bpmsoft_user }}"
+  restart: "always"
+  syslog_identifier: "dotnet-bpmsoft-service"

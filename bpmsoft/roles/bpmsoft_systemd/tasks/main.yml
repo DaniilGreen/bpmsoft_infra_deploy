@@ -1,0 +1,30 @@
+---
+# Create SystemD service for BPMSoft
+
+- name: Create SystemD service file
+  template:
+    src: dotnet-bpmsoft.service.j2
+    dest: "/etc/systemd/system/{{ bpmsoft_service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Enable BPMSoft service
+  systemd:
+    name: "{{ bpmsoft_service_name }}"
+    enabled: yes
+    state: started
+
+- name: Verify BPMSoft service status
+  systemd:
+    name: "{{ bpmsoft_service_name }}"
+  register: service_status
+
+- name: Display service status
+  debug:
+    msg: "BPMSoft service status: {{ service_status.status.ActiveState }}"
