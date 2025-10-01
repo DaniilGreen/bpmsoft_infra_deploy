@@ -30,6 +30,107 @@
       tags: [systemd, service]
   
   post_tasks:
+    - name: Copy BPMSoft application archive
+      copy:
+        src: "backups/v1.8.0/bpmsoft_1.8_app.zip"
+        dest: "/tmp/bpmsoft-app.zip"
+        mode: '0644'
+      tags: [deploy, app]
+    
+    - name: Stop BPMSoft service before deployment (if running)
+      systemd:
+        name: "{{ bpmsoft_service_name }}"
+        state: stopped
+      failed_when: false
+      tags: [deploy, app]
+    
+    - name: Clean up existing application files
+      file:
+        path: "{{ bpmsoft_home_dir }}"
+        state: absent
+      tags: [deploy, app]
+    
+    - name: Recreate BPMSoft directory
+      file:
+        path: "{{ bpmsoft_home_dir }}"
+        state: directory
+        owner: "{{ bpmsoft_user }}"
+        group: "{{ bpmsoft_user }}"
+        mode: '0755'
+      tags: [deploy, app]
+    
+    - name: Unzip BPMSoft application
+      unarchive:
+        src: "/tmp/bpmsoft-app.zip"
+        dest: "{{ bpmsoft_home_dir }}"
+        remote_src: yes
+        owner: "{{ bpmsoft_user }}"
+        group: "{{ bpmsoft_user }}"
+      tags: [deploy, app]
+    
+    - name: Remove temporary archive
+      file:
+        path: "/tmp/bpmsoft-app.zip"
+        state: absent
+      tags: [deploy, app]
+    
+    - name: Set correct permissions on BPMSoft files
+      file:
+        path: "{{ bpmsoft_home_dir }}"
+        owner: "{{ bpmsoft_user }}"
+        group: "{{ bpmsoft_user }}"
+        recurse: yes
+      tags: [deploy, app]
+    
+    - name: Configure ConnectionStrings.config
+      template:
+        src: "templates/ConnectionStrings.config.j2"
+        dest: "{{ bpmsoft_home_dir }}/ConnectionStrings.config"
+        owner: "{{ bpmsoft_user }}"
+        group: "{{ bpmsoft_user }}"
+        mode: '0644'
+        backup: yes
+      when: db_host is defined
+      tags: [deploy, app, config]
+    
+    - name: "Fix Kestrel URLs to listen on IPv4"
+      replace:
+        path: "{{ bpmsoft_home_dir }}/appsettings.json"
+        regexp: '(http|https)://::(\d+)'
+        replace: '\1://0.0.0.0:\2'
+        backup: yes
+      tags: [deploy, app, config]
+    
+    - name: Start BPMSoft service
+      systemd:
+        name: "{{ bpmsoft_service_name }}"
+        state: started
+        enabled: yes
+      tags: [deploy, app, start]
+    
+    - name: Wait for BPMSoft to start
+      pause:
+        seconds: 5
+      tags: [deploy, app, start]
+    
+    - name: Verify BPMSoft service status
+      systemd:
+        name: "{{ bpmsoft_service_name }}"
+      register: service_status
+      tags: [deploy, app, start]
+    
+    - name: Display deployment result
+      debug:
+        msg: |
+          ✅ BPMSoft v1.8.0 deployed successfully on {{ inventory_hostname }}
+          📁 Application directory: {{ bpmsoft_home_dir }}
+          🗄️ Database: {{ db_name }}@{{ db_host }}
+          🔴 Redis: {{ redis_host }}:{{ redis_port }}
+          🚀 Service status: {{ service_status.status.ActiveState }}
+          
+          Check logs: journalctl -u {{ bpmsoft_service_name }} -f
+      tags: [deploy, app]
+    
     - name: Verify BPMSoft environment
       debug:
         msg: "BPMSoft environment is ready on {{ inventory_hostname }}"

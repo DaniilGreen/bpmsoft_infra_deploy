@@ -1,0 +1,12 @@
+---
+# Database connection settings for DEV
+db_host: "192.168.154.13"
+db_port: "5432"
+db_name: "bpmsoft_dev"
+db_user: "bpmuser"
+db_password: "t3vlkNGIl15SgK9pyCOSZ8cs"
+
+# Redis connection settings for DEV
+redis_host: "192.168.154.14"
+redis_port: "6379"
+

@@ -1,0 +1,12 @@
+---
+# Database connection settings for PREPROD
+db_host: "192.168.154.33"
+db_port: "5432"
+db_name: "bpmsoft_preprod"
+db_user: "bpmuser"
+db_password: "t3vlkNGIl15SgK9pyCOSZ8cs"
+
+# Redis connection settings for PREPROD
+redis_host: "192.168.154.34"
+redis_port: "6379"
+

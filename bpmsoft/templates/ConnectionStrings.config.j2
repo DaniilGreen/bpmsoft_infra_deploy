@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<connectionStrings>
+  <add name="dbMsSQL" connectionString="Data Source=localhost; Initial Catalog=DATABASE_NAME; Persist Security Info=True; MultipleActiveResultSets=True; User ID=LOGIN; Password=PASSWORD; Pooling = true; Max Pool Size = 1000; Connection Timeout=600; Encrypt=False;"/>
+  <add name="db" connectionString="Pooling=true; Database={{ db_name }}; Host={{ db_host }}; Port={{ db_port | default('5432') }}; Username={{ db_user }}; Password={{ db_password }}; maxPoolSize=50; Timeout=5; CommandTimeout=400"/>
+  <add name="redis" connectionString="host={{ redis_host }};db=1;port={{ redis_port | default('6379') }}"/>
+  <add name="dbMssqlCore" connectionString="Data Source=tscore-ms-01\mssql2008; Initial Catalog=BPMCRMCore; Persist Security Info=True; MultipleActiveResultSets=True; Integrated Security=SSPI; Pooling = true; Max Pool Size = 100; Async = true"/>
+  <add name="dbMssqlUnitTest" connectionString="Data Source=TSAppHost-02; Initial Catalog=BPMCRMUnitTest; Persist Security Info=True; MultipleActiveResultSets=True; User ID=UnitTest; Password=UnitTest; Async = true"/>
+  <add name="tempDirectoryPath" connectionString="{{ bpmsoft_home_dir }}/Temp"/>
+  <add name="consumerInfoServiceUri" connectionString="http://sso.bpmcrm.com:4566/ConsumerInfoService.svc"/>
+  <add name="consumerInfoServiceAccessInfoPageUri" connectionString="http://sso.bpmcrm.com:4566/AccessInfoPage.aspx"/>
+  <add name="logstashConfigFolderPath" connectionString="{{ bpmsoft_home_dir }}/LogstashConfig"/>
+  <add name="elasticsearchCredentials" connectionString="User=gs-es; Password=DEQpJMfKqUVTWg9wYVgi;"/>
+  <add name="influx" connectionString="url=http://10.0.7.161:30359; user=; password=; batchIntervalMs=5000"/>
+  <add name="clientPerformanceLoggerServiceUri" connectionString="http://tsbuild-k8s-m1:30001/"/>
+  <add name="messageBroker" connectionString="amqp://guest:guest@localhost/BPMCRMSolution; useTls=false; certLocationMode=CertStore; storeName=My; certFindType=FindBySerialNumber; certFindValue=SOME_FIND_VALUE; certPath=SOME_CERTIFICATE_PATH; certPassphrase=SOME_CERTIFICATE_PASSWORD; serverName=SOME_SERVER_NAME"/>
+</connectionStrings>
+

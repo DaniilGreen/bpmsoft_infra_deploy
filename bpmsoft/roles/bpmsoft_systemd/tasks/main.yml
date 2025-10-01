@@ -14,17 +14,12 @@
   systemd:
     daemon_reload: yes
 
-- name: Enable BPMSoft service
+- name: Enable BPMSoft service (without starting)
   systemd:
     name: "{{ bpmsoft_service_name }}"
     enabled: yes
-    state: started
+    daemon_reload: yes
 
-- name: Verify BPMSoft service status
-  systemd:
-    name: "{{ bpmsoft_service_name }}"
-  register: service_status
-
-- name: Display service status
+- name: Display service info
   debug:
-    msg: "BPMSoft service status: {{ service_status.status.ActiveState }}"
+    msg: "BPMSoft service created and enabled. Start manually after configuration."
